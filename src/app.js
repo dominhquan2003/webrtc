@@ -5,6 +5,7 @@ let io = require( 'socket.io' )( server );
 let stream = require( './ws/stream' );
 let path = require( 'path' );
 let favicon = require( 'serve-favicon' );
+require("dotenv").config();
 
 app.use( favicon( path.join( __dirname, 'favicon.ico' ) ) );
 app.use( '/assets', express.static( path.join( __dirname, 'assets' ) ) );
@@ -17,3 +18,4 @@ app.get( '/', ( req, res ) => {
 io.of( '/stream' ).on( 'connection', stream );
 
 server.listen( 3000 );
+console.log(`${process.env.URL}`);
