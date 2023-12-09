@@ -1,7 +1,3 @@
-/**
- * @author Amir Sanni <amirsanni@gmail.com>
- * @date 6th January, 2020
- */
 import h from './helpers.js';
 
 window.addEventListener( 'load', () => {
@@ -77,7 +73,6 @@ window.addEventListener( 'load', () => {
                             h.setLocalStream( stream );
                         }
 
-                        //save my stream
                         myStream = stream;
 
                         stream.getTracks().forEach( ( track ) => {
@@ -132,20 +127,20 @@ window.addEventListener( 'load', () => {
             h.addChat( data, 'local' );
         }
 
-
+        
 
         function init( createOffer, partnerName ) {
             pc[partnerName] = new RTCPeerConnection( h.getIceServer() );
 
             if ( screen && screen.getTracks().length ) {
                 screen.getTracks().forEach( ( track ) => {
-                    pc[partnerName].addTrack( track, screen );//should trigger negotiationneeded event
+                    pc[partnerName].addTrack( track, screen );
                 } );
             }
 
             else if ( myStream ) {
                 myStream.getTracks().forEach( ( track ) => {
-                    pc[partnerName].addTrack( track, myStream );//should trigger negotiationneeded event
+                    pc[partnerName].addTrack( track, myStream );
                 } );
             }
 
@@ -165,8 +160,6 @@ window.addEventListener( 'load', () => {
             }
 
 
-
-            //create offer
             if ( createOffer ) {
                 pc[partnerName].onnegotiationneeded = async () => {
                     let offer = await pc[partnerName].createOffer();
@@ -177,16 +170,11 @@ window.addEventListener( 'load', () => {
                 };
             }
 
-
-
-            //send ice candidate to partnerNames
             pc[partnerName].onicecandidate = ( { candidate } ) => {
                 socket.emit( 'ice candidates', { candidate: candidate, to: partnerName, sender: socketId } );
             };
 
 
-
-            //add
             pc[partnerName].ontrack = ( e ) => {
                 let str = e.streams[0];
                 if ( document.getElementById( `${ partnerName }-video` ) ) {
@@ -194,20 +182,17 @@ window.addEventListener( 'load', () => {
                 }
 
                 else {
-                    //video elem
                     let newVid = document.createElement( 'video' );
                     newVid.id = `${ partnerName }-video`;
                     newVid.srcObject = str;
                     newVid.autoplay = true;
                     newVid.className = 'remote-video';
 
-                    //video controls elements
                     let controlDiv = document.createElement( 'div' );
                     controlDiv.className = 'remote-video-controls';
                     controlDiv.innerHTML = `<i class="fa fa-microphone text-white pr-3 mute-remote-mic" title="Mute"></i>
                         <i class="fa fa-expand text-white expand-remote-video" title="Expand"></i>`;
 
-                    //create a new div for card
                     let cardDiv = document.createElement( 'div' );
                     cardDiv.className = 'card card-sm';
                     cardDiv.id = partnerName;
@@ -254,17 +239,12 @@ window.addEventListener( 'load', () => {
             h.shareScreen().then( ( stream ) => {
                 h.toggleShareIcons( true );
 
-                //disable the video toggle btns while sharing screen. This is to ensure clicking on the btn does not interfere with the screen sharing
-                //It will be enabled was user stopped sharing screen
                 h.toggleVideoBtnDisabled( true );
-
-                //save my screen stream
                 screen = stream;
 
-                //share the new stream with all partners
                 broadcastNewTracks( stream, 'video', false );
 
-                //When the stop sharing button shown by the browser is clicked
+               
                 screen.getVideoTracks()[0].addEventListener( 'ended', () => {
                     stopSharingScreen();
                 } );
